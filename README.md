@@ -15,3 +15,5 @@ This project aims to provide a platform where researchers can upload and compare
 - [Architecture](docs/architecture.md)
 - [Technical Decisions](docs/technical_decisions.md)
 
+
+Preeti made a change to this file 
