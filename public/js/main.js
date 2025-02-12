@@ -121,7 +121,7 @@ async function fetchUserFiles() {
     const FileObject = Parse.Object.extend("FileObject");
     const query = new Parse.Query(FileObject);
 
-    // Only files belonging to the current user
+    // Only get files belonging to the current user
     query.equalTo("owner", Parse.User.current());
 
     try {
@@ -130,31 +130,38 @@ async function fetchUserFiles() {
             const file = fileObj.get("file");
             if (!file) return;
 
-            // I don't know if this is neccesary, we could just only show images.
-            // If image, we can display it. Otherwise, you could show a link.
             const fileUrl = file.url();
-            // Simple check for image extension
+            const fileId = fileObj.id; // Get the object ID of the file entry
+
+            // a container for image + delete button
+            const fileContainer = document.createElement("div");
+            fileContainer.className = "m-2 d-flex flex-column align-items-center";
+
+            // display the imagers
             if (/\.(jpe?g|png|gif|bmp)$/i.test(fileUrl)) {
                 const img = document.createElement("img");
                 img.src = fileUrl;
-                img.alt = "User file";
-                img.className = "img-thumbnail m-2";
+                img.alt = "User uploaded file";
+                img.className = "img-thumbnail";
                 img.style.maxWidth = "200px";
-                gallery.appendChild(img);
-            } else {
-                // For non-image files, show a link
-                const link = document.createElement("a");
-                link.href = fileUrl;
-                link.target = "_blank";
-                link.textContent = "Download " + file.name();
-                link.className = "m-2";
-                gallery.appendChild(link);
+                fileContainer.appendChild(img);
             }
+
+            // Delete Button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "btn btn-danger btn-sm mt-2";
+            deleteBtn.onclick = () => deleteFile(fileId, fileContainer);
+            fileContainer.appendChild(deleteBtn);
+
+            // container to gallery
+            gallery.appendChild(fileContainer);
         });
     } catch (error) {
         console.error("Error fetching user files:", error);
     }
 }
+
 
 // Logout
 if (logoutBtn) {
@@ -173,18 +180,44 @@ if (logoutBtn) {
 // The docker is an local instance.
 const callModelBtn = document.getElementById("call-model-btn");
 if (callModelBtn) {
-  callModelBtn.addEventListener("click", async () => {
-    try {
-        const response = await fetch("http://localhost:8001/message");
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
+    callModelBtn.addEventListener("click", async () => {
+        try {
+            const response = await fetch("http://localhost:8001/message");
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            alert(`${data.funny_message}`);
+        } catch (error) {
+            console.error(error);
+            alert(`Error fetching funny message: ${error.message}`);
         }
-        const data = await response.json();
-        alert(`${data.funny_message}`);
-      } catch (error) {
-        console.error(error);
-        alert(`Error fetching funny message: ${error.message}`);
-      }
-  });
+    });
 }
 
+
+// Function to delete a file from Parse and update UI
+async function deleteFile(fileId, fileElement) {
+    const confirmDelete = confirm("Are you sure you want to delete this photo?");
+    if (!confirmDelete) return;
+
+    try {
+        const FileObject = Parse.Object.extend("FileObject");
+        const query = new Parse.Query(FileObject);
+
+        const fileObj = await query.get(fileId);
+
+        if (!fileObj) {
+            alert("File not found.");
+            return;
+        }
+
+        await fileObj.destroy();
+        alert("File deleted successfully!");
+
+        fileElement.remove();
+    } catch (error) {
+        console.error("Error deleting file:", error);
+        alert(`Failed to delete file: ${error.message}`);
+    }
+}
