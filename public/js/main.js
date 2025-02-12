@@ -168,3 +168,23 @@ if (logoutBtn) {
         }
     });
 }
+
+// Model call, now just a skeleton to see if it works
+// The docker is an local instance.
+const callModelBtn = document.getElementById("call-model-btn");
+if (callModelBtn) {
+  callModelBtn.addEventListener("click", async () => {
+    try {
+        const response = await fetch("http://localhost:8001/message");
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        alert(`${data.funny_message}`);
+      } catch (error) {
+        console.error(error);
+        alert(`Error fetching funny message: ${error.message}`);
+      }
+  });
+}
+
