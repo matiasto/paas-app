@@ -1,12 +1,44 @@
-// main.js
+// public/js/main.js
 
-// Parse initialization
+// back4app setup (Parse initialization)
 Parse.initialize("6vTDvGS025ejo7MuMg3mpSSsbUQ05vjmArGj1iSB", "2VH3nnKExXqMgy2m1t8CNaC6PmBq9Js1cybnl59p");
 Parse.serverURL = "https://parseapi.back4app.com";
 
+// testing out to cache some DOM elements for quicker access (works pretty shit right now)
+const authSection = document.getElementById("auth-section");
+const appSection = document.getElementById("app-section");
+const signupForm = document.getElementById("signup-form");
+const loginForm = document.getElementById("login-form");
+const fileUploadForm = document.getElementById("file-upload-form");
+const gallery = document.getElementById("gallery");
+const logoutBtn = document.getElementById("logout-btn");
+
+// check if logged in
+window.addEventListener("load", async () => {
+    const currentUser = Parse.User.current();
+    if (currentUser) {
+        // If logged in, show app section
+        showAppSection();
+        // Populate the gallery with existing files
+        await fetchUserFiles();
+    } else {
+        // else, show auth section
+        showAuthSection();
+    }
+});
+
+// Helper function to show/hide sections
+function showAuthSection() {
+    authSection.style.display = "block";
+    appSection.style.display = "none";
+}
+
+function showAppSection() {
+    authSection.style.display = "none";
+    appSection.style.display = "block";
+}
 
 // Sign Up
-const signupForm = document.getElementById("signup-form");
 if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -20,6 +52,8 @@ if (signupForm) {
 
             await user.signUp();
             alert("User signed up successfully!");
+            showAppSection();
+            await fetchUserFiles();
         } catch (error) {
             alert(`Error: ${error.message}`);
         }
@@ -27,7 +61,6 @@ if (signupForm) {
 }
 
 // Login
-const loginForm = document.getElementById("login-form");
 if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -37,14 +70,15 @@ if (loginForm) {
         try {
             const user = await Parse.User.logIn(username, password);
             alert(`Welcome, ${user.get("username")}! You're logged in.`);
+            showAppSection();
+            await fetchUserFiles();
         } catch (error) {
             alert(`Login failed: ${error.message}`);
         }
     });
 }
 
-// File Upload
-const fileUploadForm = document.getElementById("file-upload-form");
+// File Upload + associate with the user
 if (fileUploadForm) {
     fileUploadForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -57,22 +91,80 @@ if (fileUploadForm) {
             const parseFile = new Parse.File(name, file);
 
             try {
-                // Save
+                // Save the file
                 await parseFile.save();
-                alert("file uploaded successfully");
+                alert("File uploaded successfully");
 
-                // We probably should associate the file with a Parse Object
+                // Save a FileObject record in DB, associating it with the user
                 const FileObject = Parse.Object.extend("FileObject");
                 const fileObject = new FileObject();
                 fileObject.set("file", parseFile);
+                fileObject.set("owner", Parse.User.current()); // <--- Here we associate to current user
 
                 await fileObject.save();
-                console.log("File object saved to DB with pointer to the file");
+                console.log("File object saved to DB with pointer to the file.");
+
+                // Reload to show the newly uploaded file
+                await fetchUserFiles();
             } catch (error) {
                 alert(`File upload failed: ${error.message}`);
-        }
+            }
         } else {
-            alert("select a file before uploading");
+            alert("Select a file before uploading");
         }
+    });
+}
+
+// Fetch only the current user's files and render them
+async function fetchUserFiles() {
+    gallery.innerHTML = ""; // Clear current gallery
+    const FileObject = Parse.Object.extend("FileObject");
+    const query = new Parse.Query(FileObject);
+
+    // Only files belonging to the current user
+    query.equalTo("owner", Parse.User.current());
+
+    try {
+        const results = await query.find();
+        results.forEach((fileObj) => {
+            const file = fileObj.get("file");
+            if (!file) return;
+
+            // I don't know if this is neccesary, we could just only show images.
+            // If image, we can display it. Otherwise, you could show a link.
+            const fileUrl = file.url();
+            // Simple check for image extension
+            if (/\.(jpe?g|png|gif|bmp)$/i.test(fileUrl)) {
+                const img = document.createElement("img");
+                img.src = fileUrl;
+                img.alt = "User file";
+                img.className = "img-thumbnail m-2";
+                img.style.maxWidth = "200px";
+                gallery.appendChild(img);
+            } else {
+                // For non-image files, show a link
+                const link = document.createElement("a");
+                link.href = fileUrl;
+                link.target = "_blank";
+                link.textContent = "Download " + file.name();
+                link.className = "m-2";
+                gallery.appendChild(link);
+            }
         });
+    } catch (error) {
+        console.error("Error fetching user files:", error);
+    }
+}
+
+// Logout
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+        try {
+            await Parse.User.logOut();
+            alert("You have been logged out.");
+            showAuthSection();
+        } catch (error) {
+            alert(`Logout failed: ${error.message}`);
+        }
+    });
 }
