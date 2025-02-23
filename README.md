@@ -1,14 +1,19 @@
 # PaaS App
 Authors: Lotte, Preeti, Robin, Matias
 
-Test
 
-Status: draft
-
-This project aims to provide a platform where researchers can upload and compare their image recognition models. The platform will provide a RESTful API for uploading and comparing models. The platform will also offer a web interface for users to interact with the platform.
+This project aims to provide a app where researchers can upload and compare their image recognition models.
+## Comming soon
+- The app will provide a RESTful API for uploading and comparing models. 
+- The app will provide a way to download and share models.
 
 ### Getting Started
-- Clone the repository
+- Clone the repository 
+```
+git clone https://github.com/matiasto/paas-app.git
+```
+
+#### Run a model container
 - Go to the model_container directory
 ```bash
     cd model_container/
@@ -23,7 +28,12 @@ This project aims to provide a platform where researchers can upload and compare
 ```
 - Check if the container is running by going to http://localhost:8001/
 - Should return: "Up and Running"
-- Run the front-end app by opening the index.html file in the public directory
+
+#### Run the app
+- open the file "public/index.html"
+- Login / Sign up
+- Upload image
+- Try out execution with the dummy
 
 ### Documentation
 - [Architecture](docs/architecture.md)
