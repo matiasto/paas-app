@@ -19,6 +19,8 @@ window.addEventListener("load", async () => {
     if (currentUser) {
         // If logged in, show app section
         showAppSection();
+        // populate models
+        initModelCards();
         // Populate the gallery with existing files
         await fetchUserFiles();
     } else {
@@ -37,6 +39,16 @@ function showAppSection() {
     authSection.style.display = "none";
     appSection.style.display = "block";
 }
+
+// selected Image init
+let selectedImage = null;
+
+// models
+const models = [
+    { name: "Model A", url: "http://localhost:8001/process_image" },
+    { name: "Model B", url: "http://localhost:8002/process_image" },
+    { name: "Model C", url: "http://localhost:8003/process_image" }
+];
 
 // Sign Up
 if (signupForm) {
@@ -142,9 +154,18 @@ async function fetchUserFiles() {
                 const img = document.createElement("img");
                 img.src = fileUrl;
                 img.alt = "User uploaded file";
-                img.className = "img-thumbnail";
+                img.className = "img-thumbnail selectable-image";
                 img.style.maxWidth = "200px";
                 fileContainer.appendChild(img);
+
+                // Click to select the image
+                img.onclick = function () {
+                    document.querySelectorAll(".selectable-image").forEach(image => {
+                        image.style.border = "none";
+                    });
+                    img.style.border = "3px solid blue";
+                    selectedImage = img.src; // Store selected image URL
+                };
             }
 
             // Delete Button
@@ -176,23 +197,71 @@ if (logoutBtn) {
     });
 }
 
-// Model call, now just a skeleton to see if it works
-// The docker is an local instance.
-const callModelBtn = document.getElementById("call-model-btn");
-if (callModelBtn) {
-    callModelBtn.addEventListener("click", async () => {
+function initModelCards(){
+    const modelsContainer = document.getElementById("modelsContainer");
+    models.forEach(model => {
+        const modelContainer = document.createElement("div");
+        modelContainer.className = "model-container";
+        modelContainer.id = `container-${model.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+        modelsContainer.appendChild(modelContainer);
+        createModelCard(model, modelContainer);
+    });
+}
+
+function createModelCard(model, container) {
+    const card = document.createElement("div");
+    card.className = "card mt-3";
+
+    card.innerHTML = `
+        <div class="card-body">
+            <h2>${model.name} API Call on ${model.url}</h2>
+            <p>Calls the ${model.name} container.</p>
+            <button class="btn btn-info process-btn">Process Image!</button>
+            <input type="number" class="argNr" placeholder="Enter Argument_number">
+            <input type="number" class="slice_id" placeholder="Enter slice_id">
+            <img class="resultImage" style="display:none; max-width:100%;">
+        </div>
+    `;
+
+    // Attach event listener to the button
+    card.querySelector(".process-btn").addEventListener("click", async function () {
+        const argNr = card.querySelector(".argNr").value;
+        const slice_id = card.querySelector(".slice_id").value;
+
+        if (!selectedImage) {
+            alert("Please select an image first.");
+            return;
+        }
+
+        if (!argNr || !slice_id) {
+            alert("Please enter argNr and slice_id.");
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:8001/message");
+            const response = await fetch(model.url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageUrl: selectedImage, argNr, slice_id })
+            });
+
             if (!response.ok) {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new Error("Failed to process image.");
             }
-            const data = await response.json();
-            alert(`${data.funny_message}`);
+
+            const blob = await response.blob();
+            const resultURL = URL.createObjectURL(blob);
+            const imgElement = card.querySelector(".resultImage");
+            imgElement.src = resultURL;
+            imgElement.style.display = "block";
         } catch (error) {
-            console.error(error);
-            alert(`Error fetching funny message: ${error.message}`);
+            console.error("Error:", error);
+            alert("Error processing image.");
         }
     });
+
+    container.appendChild(card);
 }
 
 

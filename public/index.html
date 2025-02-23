@@ -10,6 +10,39 @@
 </head>
 
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
+        <div class="container">
+            <!-- Logo and Slogan on the left -->
+            <a class="navbar-brand" href="#">
+                <img src="logo.png" alt="Logo" style="max-width: 50px; margin-right: 10px;">
+                MyApp <span style="font-size: 14px; font-weight: lighter;">- Innovation for Tomorrow</span>
+            </a>
+
+            <!-- Navbar toggler for mobile view -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nav items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <!-- Search Model button -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Search Model</a>
+                    </li>
+                    <!-- Manage Images button -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Manage Images</a>
+                    </li>
+                    <!-- Logout button on the far right -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <div class="container mt-5">
         <h1 class="text-center">PaaS Project Skeleton</h1>
 
@@ -70,14 +103,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Model API Call Placeholder (TODO) -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h2>Model API Call</h2>
-                    <p>This is a placeholder for calls to the separate model container.</p>
-                    <button class="btn btn-info" id="call-model-btn">Call Model API</button>
-                </div>
+            
+            <div id="modelsContainer">
+                <!-- Model placeholders will be added dynamically here -->
             </div>
 
             <!-- Logout Button -->
