@@ -48,6 +48,7 @@ const models = [
     {
         "model_id": "AnoDDPM",
         "model_name": "AnoDDPM",
+        "teaser": "AnoDDPM: Anomaly Detection with Denoising Diffusion Probabilistic Models using Simplex Noise",
         "method_description": "AnoDDPM is an unsupervised anomaly detection method that utilizes denoising diffusion probabilistic models (DDPMs) enhanced with simplex noise. It addresses the challenges of poor scalability and increased sampling times in traditional DDPMs by employing a partial diffusion process, enabling effective detection of anomalies in high-resolution medical imagery.",
         "authors": [
           "Julian Wyatt",
@@ -72,6 +73,7 @@ const models = [
       {
         "model_id": "Dummy",
         "model_name": "Dummy",
+        "teaser": "Dummy Teaser",
         "method_description": "This method is just a dummy. It outputs the input image",
         "authors": [
           "Dummy Author",
@@ -82,7 +84,7 @@ const models = [
         "arguments": [
             {
                 "number": 1,
-                "description": "TODO"  
+                "description": "Dummy description for target one"  
             }, 
         ],
         "github_link": "https://github.com/",
@@ -183,6 +185,7 @@ async function fetchUserFiles() {
             if (!file) return;
 
             const fileUrl = file.url();
+            const fileName = file.name(); // Get the filename
             const fileId = fileObj.id; // Get the object ID of the file entry
 
             // a container for image + delete button
@@ -196,6 +199,7 @@ async function fetchUserFiles() {
                 img.alt = "User uploaded file";
                 img.className = "img-thumbnail selectable-image";
                 img.style.maxWidth = "200px";
+                img.url = fileUrl;
                 fileContainer.appendChild(img);
 
                 // Click to select the image
@@ -204,8 +208,32 @@ async function fetchUserFiles() {
                         image.style.border = "none";
                     });
                     img.style.border = "3px solid blue";
-                    selectedImage = img.src; // Store selected image URL
+                    selectedImage = img.url; // Store selected image URL
                 };
+            }  // Handle `.nii.gz` files
+            else if (/\.(nii|nii\.gz)$/i.test(fileName)) {
+                fileElement = document.createElement("img");
+                fileElement.src = "folder_icon.png"; // Show a folder icon for .nii.gz
+                fileElement.alt = "NIfTI file";
+                fileElement.className = "img-thumbnail selectable-image";
+                fileElement.style.maxWidth = "100px";
+                fileElement.url = fileUrl;
+                
+                textElement = document.createElement("p");
+                textElement.innerHTML = fileName;
+                fileContainer.appendChild(textElement)
+                
+                fileContainer.appendChild(fileElement);
+                // Click to select the image
+                fileElement.onclick = function () {
+                    document.querySelectorAll(".selectable-image").forEach(image => {
+                        fileElement.style.border = "none";
+                    });
+                    fileElement.style.border = "3px solid blue";
+                    selectedImage = fileElement.url; // Store selected image URL
+                };
+            } else {
+                console.log(fileName)
             }
 
             // Delete Button
@@ -255,8 +283,8 @@ function createModelCard(model, container) {
 
     card.innerHTML = `
         <div class="card-body">
-        <h2>${model.model_name} API Call on ${model.url}</h2>
-        <p>Calls the ${model.model_name} container.</p>
+        <h2>Model :${model.model_name} </h2>
+        <p>${model.teaser} </p>
         <button class="btn btn-info process-btn">Process Image!</button>
         <input type="number" class="argNr" placeholder="Enter Argument_number">
         <input type="number" class="slice_id" placeholder="Enter slice_id">

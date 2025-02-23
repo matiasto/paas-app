@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS (CDN) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -45,9 +46,46 @@
         </div>
     </nav>
     <div class="container mt-5 pt-5">
-        <h1 class="text-center">Model Playground</h1>
-        <p><strong>Sorry, this functionality is under construction!</strong></p>
-    </div>
+        <div id="markdown-content"></div>
+        <h1 id="share-your-model-">Share your Model!</h1>
+        <p>In this documentation we provide you with the starting steps to share your models with us. </p>
+        <h2 id="step-1-">Step 1.</h2>
+        <p>Get the template. 
+        Clone our github repository from <a href="https://github.com/matiasto/paas-app">https://github.com/matiasto/paas-app</a> </p>
+        <pre><code>git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/matiasto/paas-app.git
+        </code></pre><h2 id="step-2-locate-the-container-setup">Step 2. Locate the container setup</h2>
+        <p>In the folder model_container you will find our example setup for our model execution.</p>
+        <p>The Dockerfile provides the instructions to set up a container with a webserver this application can talk to. 
+        It tells the system to run flask-app.py on start up and installs all the dependencies necessairy for the template and your libraries for your pipeline. </p>
+        <h2 id="step-3-edit-requirements-txt">Step 3. Edit requirements.txt</h2>
+        <p>Please copy all your requirements your scripts need to analyze an image into the requirements.txt files. 
+        Ideally with a version number to make shure the dependencis are integratable.</p>
+        <pre><code><span class="hljs-comment"># Example </span>
+        <span class="hljs-attr">Flask</span>==<span class="hljs-number">3.1</span>.<span class="hljs-number">0</span>
+        </code></pre><h2 id="step-4-customize-process_image">Step 4. Customize process_image</h2>
+        <p>The template will take an uploaded image and 2 arguments, save the image temporarily and execute a script as a subprocess. </p>
+        <pre><code><span class="hljs-selector-tag">subprocess</span><span class="hljs-selector-class">.run</span>([<span class="hljs-string">"python3"</span>, <span class="hljs-string">"analyze_image.py"</span>, argNr, image_path, slice_id], check=True)
+        # <span class="hljs-selector-tag">imiteate</span> <span class="hljs-selector-tag">the</span> <span class="hljs-selector-tag">shell</span> <span class="hljs-selector-tag">execution</span>: <span class="hljs-selector-tag">python</span> <span class="hljs-selector-tag">analyze_image</span><span class="hljs-selector-class">.py</span> <span class="hljs-selector-attr">[argument_nr]</span> <span class="hljs-selector-attr">[image_path]</span> <span class="hljs-selector-attr">[slice_id]</span>
+        </code></pre><p>This offers the ability to integrate your own scipts and execute them as you like. Feel free to adept this to your liking. </p>
+        <p>Direct integrations withour a subprocess are also possible. </p>
+        <h2 id="step-5-import-your-scipts">Step 5 Import your scipts</h2>
+        <p>Copy all your needed scripts and other needed files into the &quot;model_container&quot; folder. This should include your model and the logic on how to load it.</p>
+        <h2 id="step-5-be-shure-to-save-and-return-your-output">Step 5. Be shure to save and return your output</h2>
+        <p>The template expects the final output image to be under the path \&quot;output_image/final.png\&quot; and it gets sent back to the GUI.  </p>
+        <h2 id="step-6-build">Step 6. Build</h2>
+        <p>Build your docker-image using the command:</p>
+        <pre><code>docker build -t [image_name] .
+        </code></pre><p>And test it by running it:</p>
+        <pre><code>docker run -d -p <span class="hljs-string">[container_port]</span>:<span class="hljs-string">[local_system_port]</span> --name <span class="hljs-string">[model_container_name]</span> <span class="hljs-string">[image_name]</span>
+        </code></pre><h2 id="step-7-test-your-model-">Step 7. Test your model.</h2>
+        <p>Add your model to the models object in public/js/main.js. 
+        Open the public/index.html file and you should be able to use your files with your new setup!.</p>
+        <h2 id="step-8-share-your-model">Step 8. Share your model</h2>
+        <p>Now we would like you to send either the docker image or the whole model_container with us to integrate it.
+        MediScanAI would love to integrate your contribution. </p>
+        
+        
+        </div>
 
     <!-- Bootstrap JS (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
