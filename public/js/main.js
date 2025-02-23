@@ -45,31 +45,6 @@ let selectedImage = null;
 
 // models
 const models = [
-    {
-        "model_id": "AnoDDPM",
-        "model_name": "AnoDDPM",
-        "teaser": "AnoDDPM: Anomaly Detection with Denoising Diffusion Probabilistic Models using Simplex Noise",
-        "method_description": "AnoDDPM is an unsupervised anomaly detection method that utilizes denoising diffusion probabilistic models (DDPMs) enhanced with simplex noise. It addresses the challenges of poor scalability and increased sampling times in traditional DDPMs by employing a partial diffusion process, enabling effective detection of anomalies in high-resolution medical imagery.",
-        "authors": [
-          "Julian Wyatt",
-          "Adam Leach",
-          "Sebastian M. Schmon",
-          "Chris G. Willcocks"
-        ],
-        "use_cases": [
-          "Anomaly detection in medical imaging, particularly for identifying tumors in MRI scans.",
-          "Enhancing the robustness and generalizability of anomaly detection models in medical applications."
-        ],
-        "arguments": [
-            {
-                "number": 1,
-                "description": "Argument-File 1, batch 1000 epochs, batch size of 1 .."  
-            }, 
-        ],
-        "github_link": "https://github.com/Julian-Wyatt/AnoDDPM",
-        "paper_link": "https://julianwyatt.co.uk/anoddpm",
-        "url": "http://localhost:8002/process_image"
-      },
       {
         "model_id": "Dummy",
         "model_name": "Dummy",
@@ -87,6 +62,7 @@ const models = [
                 "description": "Dummy description for target one"  
             }, 
         ],
+        "hardware_description": "OS=Linux ubuntu 22.04; GPU=..",
         "github_link": "https://github.com/",
         "paper_link": "",
         "url": "http://localhost:8001/process_image"
@@ -310,6 +286,7 @@ function createModelCard(model, container) {
                         </ul>
                         <p><strong>GitHub Repository:</strong> <a href="${model.github_link}" target="_blank">${model.github_link}</a></p>
                         <p><strong>Research Paper:</strong> <a href="${model.paper_link}" target="_blank">${model.paper_link}</a></p>
+                        <p><strong>Hardware_Info:</strong> ${model.hardware_description} </p>
 
                         <!-- Configuration Options (arguments) -->
                         <h5>Available Configurations / Arguments:</h5>
