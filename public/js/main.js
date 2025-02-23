@@ -63,7 +63,7 @@ const models = [
         "arguments": [
             {
                 "number": 1,
-                "description": "TODO"  
+                "description": "Argument-File 1, batch 1000 epochs, batch size of 1 .."  
             }, 
         ],
         "github_link": "https://github.com/Julian-Wyatt/AnoDDPM",

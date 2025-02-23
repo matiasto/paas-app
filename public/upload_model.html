@@ -63,7 +63,7 @@
         <pre><code><span class="hljs-comment"># Example </span>
         <span class="hljs-attr">Flask</span>==<span class="hljs-number">3.1</span>.<span class="hljs-number">0</span>
         </code></pre><h2 id="step-4-customize-process_image">Step 4. Customize process_image</h2>
-        <p>The template will take an uploaded image and 2 arguments, save the image temporarily and execute a script as a subprocess. </p>
+        <p>The template will take an uploaded image and 2 arguments, save the image temporarily and execute a script as a subprocess. The argNr argument is typically used to refer to the corresponding configuration file for execution. Slice_number is only one example of additional parameters. </p>
         <pre><code><span class="hljs-selector-tag">subprocess</span><span class="hljs-selector-class">.run</span>([<span class="hljs-string">"python3"</span>, <span class="hljs-string">"analyze_image.py"</span>, argNr, image_path, slice_id], check=True)
         # <span class="hljs-selector-tag">imiteate</span> <span class="hljs-selector-tag">the</span> <span class="hljs-selector-tag">shell</span> <span class="hljs-selector-tag">execution</span>: <span class="hljs-selector-tag">python</span> <span class="hljs-selector-tag">analyze_image</span><span class="hljs-selector-class">.py</span> <span class="hljs-selector-attr">[argument_nr]</span> <span class="hljs-selector-attr">[image_path]</span> <span class="hljs-selector-attr">[slice_id]</span>
         </code></pre><p>This offers the ability to integrate your own scipts and execute them as you like. Feel free to adept this to your liking. </p>
