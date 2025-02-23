@@ -19,6 +19,8 @@ window.addEventListener("load", async () => {
     if (currentUser) {
         // If logged in, show app section
         showAppSection();
+        // populate models
+        initModelCards();
         // Populate the gallery with existing files
         await fetchUserFiles();
     } else {
@@ -38,6 +40,34 @@ function showAppSection() {
     appSection.style.display = "block";
 }
 
+// selected Image init
+let selectedImage = null;
+
+// models
+const models = [
+      {
+        "model_id": "Dummy",
+        "model_name": "Dummy",
+        "teaser": "Dummy Teaser",
+        "method_description": "This method is just a dummy. It outputs the input image",
+        "authors": [
+          "Dummy Author",
+        ],
+        "use_cases": [
+          "Testing purpuses",
+        ],
+        "arguments": [
+            {
+                "number": 1,
+                "description": "Dummy description for target one"  
+            }, 
+        ],
+        "hardware_description": "OS=Linux ubuntu 22.04; GPU=..",
+        "github_link": "https://github.com/",
+        "paper_link": "",
+        "url": "http://localhost:8001/process_image"
+      }
+]
 // Sign Up
 if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
@@ -131,6 +161,7 @@ async function fetchUserFiles() {
             if (!file) return;
 
             const fileUrl = file.url();
+            const fileName = file.name(); // Get the filename
             const fileId = fileObj.id; // Get the object ID of the file entry
 
             // a container for image + delete button
@@ -142,9 +173,43 @@ async function fetchUserFiles() {
                 const img = document.createElement("img");
                 img.src = fileUrl;
                 img.alt = "User uploaded file";
-                img.className = "img-thumbnail";
+                img.className = "img-thumbnail selectable-image";
                 img.style.maxWidth = "200px";
+                img.url = fileUrl;
                 fileContainer.appendChild(img);
+
+                // Click to select the image
+                img.onclick = function () {
+                    document.querySelectorAll(".selectable-image").forEach(image => {
+                        image.style.border = "none";
+                    });
+                    img.style.border = "3px solid blue";
+                    selectedImage = img.url; // Store selected image URL
+                };
+            }  // Handle `.nii.gz` files
+            else if (/\.(nii|nii\.gz)$/i.test(fileName)) {
+                fileElement = document.createElement("img");
+                fileElement.src = "folder_icon.png"; // Show a folder icon for .nii.gz
+                fileElement.alt = "NIfTI file";
+                fileElement.className = "img-thumbnail selectable-image";
+                fileElement.style.maxWidth = "100px";
+                fileElement.url = fileUrl;
+                
+                textElement = document.createElement("p");
+                textElement.innerHTML = fileName;
+                fileContainer.appendChild(textElement)
+                
+                fileContainer.appendChild(fileElement);
+                // Click to select the image
+                fileElement.onclick = function () {
+                    document.querySelectorAll(".selectable-image").forEach(image => {
+                        fileElement.style.border = "none";
+                    });
+                    fileElement.style.border = "3px solid blue";
+                    selectedImage = fileElement.url; // Store selected image URL
+                };
+            } else {
+                console.log(fileName)
             }
 
             // Delete Button
@@ -176,23 +241,103 @@ if (logoutBtn) {
     });
 }
 
-// Model call, now just a skeleton to see if it works
-// The docker is an local instance.
-const callModelBtn = document.getElementById("call-model-btn");
-if (callModelBtn) {
-    callModelBtn.addEventListener("click", async () => {
+function initModelCards(){
+    const modelsContainer = document.getElementById("modelsContainer");
+    models.forEach(model => {
+        const modelContainer = document.createElement("div");
+        modelContainer.className = "model-container";
+        modelContainer.id = `container-${model.model_name.replace(/\s+/g, "-").toLowerCase()}`;
+
+        modelsContainer.appendChild(modelContainer);
+        createModelCard(model, modelContainer);
+    });
+}
+
+function createModelCard(model, container) {
+    const card = document.createElement("div");
+    card.className = "card mt-3";
+
+    card.innerHTML = `
+        <div class="card-body">
+        <h2>Model :${model.model_name} </h2>
+        <p>${model.teaser} </p>
+        <button class="btn btn-info process-btn">Process Image!</button>
+        <input type="number" class="argNr" placeholder="Enter Argument_number">
+        <input type="number" class="slice_id" placeholder="Enter slice_id">
+        <img class="resultImage" style="display:none; max-width:100%;">
+
+        <!-- Accordion Section -->
+        <div class="accordion" id="accordion-${model.model_id}">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-${model.model_id}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${model.model_id}" aria-expanded="false" aria-controls="collapse-${model.model_id}">
+                        More Info <i class="bi bi-caret-down-fill ms-2"></i>
+                    </button>
+                </h2>
+                <div id="collapse-${model.model_id}" class="accordion-collapse collapse" aria-labelledby="heading-${model.model_id}" data-bs-parent="#accordion-${model.model_id}">
+                    <div class="accordion-body">
+                        <h5>Authors:</h5>
+                        <ul>
+                            ${model.authors.map(author => `<li>${author}</li>`).join('')}
+                        </ul>
+                        <h5>Use Cases:</h5>
+                        <ul>
+                            ${model.use_cases.map(useCase => `<li>${useCase}</li>`).join('')}
+                        </ul>
+                        <p><strong>GitHub Repository:</strong> <a href="${model.github_link}" target="_blank">${model.github_link}</a></p>
+                        <p><strong>Research Paper:</strong> <a href="${model.paper_link}" target="_blank">${model.paper_link}</a></p>
+                        <p><strong>Hardware_Info:</strong> ${model.hardware_description} </p>
+
+                        <!-- Configuration Options (arguments) -->
+                        <h5>Available Configurations / Arguments:</h5>
+                        <ul>
+                            ${model.arguments ? model.arguments.map(arg => `<li><strong>Number: ${arg.number}</strong>: ${arg.description}</li>`).join('') : 'No configurations available.'}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    // Attach event listener to the button
+    card.querySelector(".process-btn").addEventListener("click", async function () {
+        const argNr = card.querySelector(".argNr").value;
+        const slice_id = card.querySelector(".slice_id").value;
+
+        if (!selectedImage) {
+            alert("Please select an image first.");
+            return;
+        }
+
+        if (!argNr || !slice_id) {
+            alert("Please enter argNr and slice_id.");
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:8001/message");
+            const response = await fetch(model.url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageUrl: selectedImage, argNr, slice_id })
+            });
+
             if (!response.ok) {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new Error("Failed to process image.");
             }
-            const data = await response.json();
-            alert(`${data.funny_message}`);
+
+            const blob = await response.blob();
+            const resultURL = URL.createObjectURL(blob);
+            const imgElement = card.querySelector(".resultImage");
+            imgElement.src = resultURL;
+            imgElement.style.display = "block";
         } catch (error) {
-            console.error(error);
-            alert(`Error fetching funny message: ${error.message}`);
+            console.error("Error:", error);
+            alert("Error processing image.");
         }
     });
+
+    container.appendChild(card);
 }
 
 
