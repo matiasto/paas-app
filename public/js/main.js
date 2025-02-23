@@ -45,11 +45,51 @@ let selectedImage = null;
 
 // models
 const models = [
-    { name: "Model A", url: "http://localhost:8001/process_image" },
-    { name: "Model B", url: "http://localhost:8002/process_image" },
-    { name: "Model C", url: "http://localhost:8003/process_image" }
-];
-
+    {
+        "model_id": "AnoDDPM",
+        "model_name": "AnoDDPM",
+        "method_description": "AnoDDPM is an unsupervised anomaly detection method that utilizes denoising diffusion probabilistic models (DDPMs) enhanced with simplex noise. It addresses the challenges of poor scalability and increased sampling times in traditional DDPMs by employing a partial diffusion process, enabling effective detection of anomalies in high-resolution medical imagery.",
+        "authors": [
+          "Julian Wyatt",
+          "Adam Leach",
+          "Sebastian M. Schmon",
+          "Chris G. Willcocks"
+        ],
+        "use_cases": [
+          "Anomaly detection in medical imaging, particularly for identifying tumors in MRI scans.",
+          "Enhancing the robustness and generalizability of anomaly detection models in medical applications."
+        ],
+        "arguments": [
+            {
+                "number": 1,
+                "description": "TODO"  
+            }, 
+        ],
+        "github_link": "https://github.com/Julian-Wyatt/AnoDDPM",
+        "paper_link": "https://julianwyatt.co.uk/anoddpm",
+        "url": "http://localhost:8002/process_image"
+      },
+      {
+        "model_id": "Dummy",
+        "model_name": "Dummy",
+        "method_description": "This method is just a dummy. It outputs the input image",
+        "authors": [
+          "Dummy Author",
+        ],
+        "use_cases": [
+          "Testing purpuses",
+        ],
+        "arguments": [
+            {
+                "number": 1,
+                "description": "TODO"  
+            }, 
+        ],
+        "github_link": "https://github.com/",
+        "paper_link": "",
+        "url": "http://localhost:8001/process_image"
+      }
+]
 // Sign Up
 if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
@@ -202,7 +242,7 @@ function initModelCards(){
     models.forEach(model => {
         const modelContainer = document.createElement("div");
         modelContainer.className = "model-container";
-        modelContainer.id = `container-${model.name.replace(/\s+/g, "-").toLowerCase()}`;
+        modelContainer.id = `container-${model.model_name.replace(/\s+/g, "-").toLowerCase()}`;
 
         modelsContainer.appendChild(modelContainer);
         createModelCard(model, modelContainer);
@@ -215,13 +255,44 @@ function createModelCard(model, container) {
 
     card.innerHTML = `
         <div class="card-body">
-            <h2>${model.name} API Call on ${model.url}</h2>
-            <p>Calls the ${model.name} container.</p>
-            <button class="btn btn-info process-btn">Process Image!</button>
-            <input type="number" class="argNr" placeholder="Enter Argument_number">
-            <input type="number" class="slice_id" placeholder="Enter slice_id">
-            <img class="resultImage" style="display:none; max-width:100%;">
+        <h2>${model.model_name} API Call on ${model.url}</h2>
+        <p>Calls the ${model.model_name} container.</p>
+        <button class="btn btn-info process-btn">Process Image!</button>
+        <input type="number" class="argNr" placeholder="Enter Argument_number">
+        <input type="number" class="slice_id" placeholder="Enter slice_id">
+        <img class="resultImage" style="display:none; max-width:100%;">
+
+        <!-- Accordion Section -->
+        <div class="accordion" id="accordion-${model.model_id}">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-${model.model_id}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${model.model_id}" aria-expanded="false" aria-controls="collapse-${model.model_id}">
+                        More Info <i class="bi bi-caret-down-fill ms-2"></i>
+                    </button>
+                </h2>
+                <div id="collapse-${model.model_id}" class="accordion-collapse collapse" aria-labelledby="heading-${model.model_id}" data-bs-parent="#accordion-${model.model_id}">
+                    <div class="accordion-body">
+                        <h5>Authors:</h5>
+                        <ul>
+                            ${model.authors.map(author => `<li>${author}</li>`).join('')}
+                        </ul>
+                        <h5>Use Cases:</h5>
+                        <ul>
+                            ${model.use_cases.map(useCase => `<li>${useCase}</li>`).join('')}
+                        </ul>
+                        <p><strong>GitHub Repository:</strong> <a href="${model.github_link}" target="_blank">${model.github_link}</a></p>
+                        <p><strong>Research Paper:</strong> <a href="${model.paper_link}" target="_blank">${model.paper_link}</a></p>
+
+                        <!-- Configuration Options (arguments) -->
+                        <h5>Available Configurations / Arguments:</h5>
+                        <ul>
+                            ${model.arguments ? model.arguments.map(arg => `<li><strong>Number: ${arg.number}</strong>: ${arg.description}</li>`).join('') : 'No configurations available.'}
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
     `;
 
     // Attach event listener to the button
