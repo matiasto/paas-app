@@ -80,9 +80,55 @@
         </code></pre><h2 id="step-7-test-your-model-">Step 7. Test your model.</h2>
         <p>Add your model to the models object in public/js/main.js. 
         Open the public/index.html file and you should be able to use your files with your new setup!.</p>
+        <pre><code>
+            const models = [{ // The dummy 
+            "model_id": "Dummy",
+            "model_name": "Dummy",
+            "teaser": "Dummy Teaser",
+            "method_description": "This method is just a dummy. It outputs the input image",
+            "authors": [
+              "Dummy Author",
+            ],
+            "use_cases": [
+              "Testing purpuses",
+            ],
+            "arguments": [
+                {
+                    "number": 1,
+                    "description": "Dummy description for target one"  
+                }, 
+            ],
+            "github_link": "https://github.com/",
+            "paper_link": "",
+            "url": "http://localhost:8001/process_image"
+          }, 
+          {
+            "model_id": "your_model", // your copy 
+            "model_name": "Your Model",
+            "teaser": "Your Model Teaser",
+            "method_description": "This method is just your Model adapt. It outputs the input image",
+            "authors": [
+              "You",
+            ],
+            "use_cases": [
+              "Testing purpuses",
+            ],
+            "arguments": [
+                {
+                    "number": 1,
+                    "description": "Dummy description for target one"  
+                }, 
+            ],
+            "github_link": "https://github.com/",
+            "paper_link": "",
+            "url": "http://localhost:[container_port]/process_image"
+          }
+        ]
+        </code></pre>
         <h2 id="step-8-share-your-model">Step 8. Share your model</h2>
         <p>Now we would like you to send either the docker image or the whole model_container with us to integrate it.
         MediScanAI would love to integrate your contribution. </p>
+
         
         
         </div>
